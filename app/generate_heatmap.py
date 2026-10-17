@@ -1,13 +1,25 @@
+"""
+Grad-CAM heatmap generation for the chest X-ray model.
+
+Original code: pmk456 / AI-Powered-Early-Disease-Prediction-System (GPL-3.0).
+Modified for academic submission by nishantshukla011 on 17 October 2026:
+model and output paths made independent of the working directory, guard
+against a division by zero when the heatmap is all zeros, and the manual test
+block takes an image path.
+"""
+
 import tensorflow as tf
 import numpy as np
 import cv2
 from PIL import Image
 from io import BytesIO
 import os
+import sys
+
+from app.config import MODEL_PATH, HEATMAP_DIR
 
 IMG_SIZE = (224, 224)
-MODEL_PATH = "app/models/chest_xray_model.keras"
-OUTPUT_DIR = "static/heatmaps"  # Directory to save heatmap images
+OUTPUT_DIR = HEATMAP_DIR  # Directory to save heatmap images
 
 class XRayHeatmapGenerator:
     def __init__(self):
@@ -48,7 +60,9 @@ class XRayHeatmapGenerator:
         # Multiply each channel by its gradient importance
         heatmap = conv_outputs[0] @ pooled_grads[..., tf.newaxis]
         heatmap = tf.squeeze(heatmap)
-        heatmap = tf.maximum(heatmap, 0) / tf.math.reduce_max(heatmap)  # Normalize
+        heatmap = tf.maximum(heatmap, 0)
+        max_value = tf.math.reduce_max(heatmap)
+        heatmap = heatmap / max_value if float(max_value) > 0 else heatmap  # Normalize
         return heatmap.numpy()
 
     def overlay_heatmap(self, heatmap, image_bytes, output_filename="heatmap_overlay.png", alpha=0.5):
@@ -69,8 +83,12 @@ class XRayHeatmapGenerator:
         return output_path  # Return the path of the saved heatmap image
 
 if __name__ == "__main__":
+    # Manual check:  python -m app.generate_heatmap path/to/xray.png
+    if len(sys.argv) != 2:
+        sys.exit("Usage: python -m app.generate_heatmap path/to/xray.png")
     heatmap_generator = XRayHeatmapGenerator()
-    image_bytes = open("model_train/NIH_CHEST_XRAY/00000001_002.png", "rb").read()
+    with open(sys.argv[1], "rb") as f:
+        image_bytes = f.read()
     heatmap = heatmap_generator.generate_heatmap(image_bytes)
     if heatmap is not None:
         output_path = heatmap_generator.overlay_heatmap(heatmap, image_bytes)

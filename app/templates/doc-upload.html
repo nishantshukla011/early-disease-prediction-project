@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload with Permission</title>
+    <title>X-Ray Upload | Early Disease Prediction System</title>
     <link rel="stylesheet" href="/static/css/upload.css">
 </head>
 <body>
     <div class="logo-section">
-        <img src="/static/images/au png.jpg" class="card-img1" alt="...">
-        <h1 class="top-head">AI Powered Early Disease Prediction</h1>
-        <img src="/static/images/3.O logo.png" class="card-img2" alt="...">
+        <h1 class="top-head">AI-Powered Early Disease Prediction System</h1>
     </div>
     <div class="overall">
         <div class="upload-container">
-            <h2>Upload Your File</h2>
+            <h2>Upload a Chest X-Ray (PNG or JPG, max 10 MB)</h2>
             <form action="/doctor-login/doctor-dashboard/doctor-upload-xray" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" id="image_file" accept="image/*" required>
+                <input type="file" name="file" id="image_file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" required>
                 <button class="upload-btn" type='submit'>Upload</button>
             </form>
         </div>
     </div>
+    <p style="text-align:center;font-size:0.8em;color:#444;margin:12px;">Educational demonstration only. Not a medical device and not a diagnosis.</p>
 </body>
 </html>

@@ -1,1 +1,23 @@
-{{ message }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or "Error" }} | Early Disease Prediction System</title>
+    <style>
+        body { font-family: 'Poppins', Arial, sans-serif; background: #f3f6fb; display: flex;
+               align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .box { background: #fff; padding: 32px 40px; border-radius: 12px; max-width: 460px;
+               box-shadow: 0 4px 18px rgba(0,0,0,.12); text-align: center; }
+        h1 { font-size: 1.3em; margin-top: 0; }
+        a { color: #1a56db; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>{{ title or "Error" }}</h1>
+        <p>{{ message }}</p>
+        <p><a href="/">Back to home</a></p>
+    </div>
+</body>
+</html>

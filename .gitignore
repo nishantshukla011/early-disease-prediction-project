@@ -1,2 +1,16 @@
+# Large training dataset (not part of the repository)
 app/model_train/dataset
 
+# Runtime files
+uploads/
+app/static/heatmaps/*.png
+!app/static/heatmaps/heatmap_overlay.png
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets
+.env

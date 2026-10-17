@@ -4,15 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Admin Login | Early Disease Prediction System</title>
   <link rel="stylesheet" href="/static/css/admin-login.css">
 </head>
 
 <body>
   <div class="logo-section">
-    <img src="/static/images/au png.jpg" class="card-img1" alt="...">
-    <h1 class="top-head">AI Powered Early Disease Prediction</h1>
-    <img src="/static/images/3.O logo.png" class="card-img2" alt="...">
+    <h1 class="top-head">AI-Powered Early Disease Prediction System</h1>
   </div>
 
   <!-- <h1>Admins Login Form</h1> -->
@@ -38,7 +36,7 @@
             </div>
         
 
-            <button type="submit" class="btn" onclick="goToDashBoard()">Login</button>
+            <button type="submit" class="btn">Login</button>
 
 
             <!-- <div class="login-register">
@@ -50,6 +48,7 @@
 
 
           </form>
+        <p style="margin-top:14px;font-size:0.8em;text-align:center;color:#555;">Demo login only: {{ demo_credentials['admin'][0] }} / {{ demo_credentials['admin'][1] }} (demo credentials, not real authentication)</p>
         </div>
       </div>
     </div>
@@ -58,9 +57,5 @@
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 <script src="/static/js/script.js"></script>
-<script>function goToDashBoard() {
-    window.location.href = '/admin-dashboard'; // Change '/' to your desired homepage URL if needed
-  }
-</script>
 
 </html>

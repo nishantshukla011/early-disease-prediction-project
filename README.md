@@ -1,55 +1,135 @@
 # AI-Powered Early Disease Prediction System
 
-## Overview
-The AI-Powered Early Disease Prediction System is a Python Flask web application designed to demonstrate how machine learning can assist with medical image analysis. It includes an X-ray analysis workflow, heatmap visualization, and a web interface with separate login areas for patients, doctors, and administrators.
+A Python Flask web application that demonstrates how a deep-learning model can assist with chest X-ray analysis. A doctor uploads a chest X-ray, the model returns its predicted labels, a Grad-CAM heatmap is drawn, and a PDF report is produced.
+
+> **Educational demonstration only.** This is not a medical device and its output is not a diagnosis. See [Limitations and disclaimer](#limitations-and-disclaimer).
 
 ## Features
-- Chest X-ray image upload and model-based prediction.
-- Heatmap generation to visualize image regions associated with the model's output.
-- Doctor dashboard with patient data and emergency-related sections.
-- Flask-based web interface with HTML templates and static assets.
-- Automated report generation, subject to API configuration and availability.
 
-## Technology Stack
-- Python and Flask
-- TensorFlow/Keras
-- OpenAI API for the original report-generation implementation
-- HTML, CSS, and JavaScript
+- Home page with separate Admin, Doctor and Patient login pages.
+- Doctor login (demo credentials) and patient login (demo credentials).
+- Chest X-ray upload (PNG or JPG, up to 10 MB) with validation; uploaded files are deleted after the report is built.
+- Prediction with the trained Keras model `app/models/chest_xray_model.keras` (14 NIH ChestX-ray14 labels).
+- Grad-CAM heatmap overlay.
+- PDF report built with a local, deterministic template. No internet connection or paid API is needed.
+- Friendly error pages instead of tracebacks.
 
-## Project Structure
-- `run.py` — application entry point
-- `app/routes.py` — web routes and application workflows
-- `app/api.py` — X-ray prediction logic
-- `app/chat.py` — report text generation
-- `app/generate_heatmap.py` — heatmap generation
-- `app/models/` — trained model file
-- `app/templates/` — HTML pages
-- `app/static/` — static assets
-- `requirements.txt` — Python dependencies
+Not implemented in this demo (the buttons say so): MRI analysis, patient records, doctor assignment, admin statistics, enquiries.
 
-## Setup
-1. Install Python compatible with the dependencies in `requirements.txt`.
-2. Clone this repository:
-   ```bash
-   git clone https://github.com/nishantshukla011/early-disease-prediction-project.git
-   cd early-disease-prediction-project
-   ```
-3. Create and activate a virtual environment.
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. Configure any required API credentials using environment variables. Never commit API keys or passwords.
-6. Start the application:
-   ```bash
-   python run.py
-   ```
+## Technology stack
 
-## Limitations
-This project is an educational demonstration, not a medical diagnostic device. Predictions can be inaccurate and must not be used to make clinical decisions. Model performance depends on its training data and implementation. Some report-generation features may require external API access.
+- Python 3.11 (recommended), Flask 3.1
+- TensorFlow 2.19 / Keras 3.9 (EfficientNetB0-based model)
+- OpenCV, Pillow, NumPy
+- fpdf 1.7.2 for PDF output
+- HTML, CSS and a little JavaScript
 
-## Attribution and License
-This repository is based on the original project by [pmk456](https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System). The original project includes a GPL-3.0 license; retain the license and comply with its terms when redistributing or modifying the code.
+## Project structure
 
-## Disclaimer
-This application is intended for educational and demonstration purposes only. It is not a substitute for professional medical evaluation.
+```
+.
+├── run.py                      # starts the web server
+├── requirements.txt
+├── LICENSE                     # GNU GPL v3
+├── README.md
+└── app/
+    ├── __init__.py             # Flask app factory, error pages
+    ├── config.py               # paths, upload limits, DEMO credentials
+    ├── routes.py               # all web routes
+    ├── api.py                  # X-ray prediction (XRayPredictor)
+    ├── generate_heatmap.py     # Grad-CAM heatmap
+    ├── report.py               # local report text template
+    ├── utils.py                # PDF builder
+    ├── models/chest_xray_model.keras
+    ├── model_train/            # original training scripts and NIH label CSVs
+    ├── templates/              # HTML pages
+    ├── static/                 # CSS, JS, images, heatmap output folder
+    └── tests/test.py           # automated tests
+```
+
+## Installation and running (Windows PowerShell)
+
+Install **Python 3.11** from python.org first. TensorFlow 2.19 supports Python 3.9 to 3.12 and does **not** support Python 3.13.
+
+```powershell
+git clone https://github.com/nishantshukla011/early-disease-prediction-project.git
+cd early-disease-prediction-project
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python run.py
+```
+
+Open <http://127.0.0.1:3000> in your browser.
+
+If PowerShell blocks the activation script, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and activate again.
+
+Run the automated tests (from the project folder, with the virtual environment active):
+
+```powershell
+python -m unittest discover -s app/tests -p test.py -v
+```
+
+Troubleshooting on Windows: if TensorFlow reports `DLL load failed`, install the "Microsoft Visual C++ Redistributable 2015-2022". If `pip` fails with a path-too-long error, clone the project to a short folder such as `C:\edp`.
+
+## Demo login
+
+The login pages show the demo credentials. They are defined in `app/config.py`:
+
+| Role    | User ID  | Password |
+|---------|----------|----------|
+| Admin   | `mahima` | `mahima` |
+| Doctor  | `mahima` | `mahima` |
+| Patient | `mahima` | `mahima` |
+
+These are **demo credentials, not real authentication**. There is no database, no password hashing and no user management. Never deploy this application publicly with them.
+
+## Using the application
+
+1. Log in as a doctor and choose **X-RAY Insight**.
+2. Upload a chest X-ray image (PNG or JPG).
+3. The browser downloads `xray_report.pdf` containing the uploaded image, the model output, the heatmap and a disclaimer.
+
+## How the local report generation works
+
+`app/report.py` builds the report text from a fixed template. It makes no network calls and uses no language model.
+
+- It only uses the labels (and raw scores) that the model actually returned. A label is returned when the model's sigmoid output for it is above 0.5.
+- If no label passes the threshold, the report says so and states that this does not rule out disease.
+- For each returned label it adds one line of generic background about the condition. This is textbook-style context, not a finding about the patient.
+- Every report ends with a disclaimer that the output is not a diagnosis.
+- The same input always produces the same text.
+
+The original project used the paid OpenAI API for this step. That dependency was removed.
+
+## Limitations and disclaimer
+
+- The model was trained by the original authors on the first 30,000 rows of the NIH ChestX-ray14 label file (see `app/model_train/`). This repository does not include validated performance figures.
+- The model can miss findings and can flag findings that are not present. Raw model outputs are not calibrated probabilities.
+- The Grad-CAM heatmap shows what influenced the model's highest-scoring output. It does not mark or confirm a lesion.
+- The model expects chest X-rays. Other images will still produce an output, which is meaningless.
+- Any result must be reviewed by a qualified radiologist or medical professional. Do not use this software for clinical decisions.
+
+## Testing status
+
+`app/tests/test.py` covers the routes, login handling, upload validation, error pages, report text, clean-up of temporary files, and the PDF response. The tests replace the TensorFlow model with a small fake so they run quickly. A full run with the real model (prediction, heatmap and PDF) is done by following the steps in "Using the application" with a chest X-ray image.
+
+## Attribution and licence
+
+This project is a modified copy of **AI-Powered-Early-Disease-Prediction-System** by [pmk456](https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System) (original author named in the source headers: Patan Musthakheem). The trained model, training scripts, interface design and the original application structure come from that project.
+
+It is distributed under the **GNU General Public License v3.0** (see `LICENSE`), the same licence as the original. The original author and date headers in the source files are kept unchanged.
+
+### Modifications made for this submission (17 October 2026, by nishantshukla011)
+
+- Removed the OpenAI report generation (`chat.py`) and the `openai` dependency; added the local template `app/report.py`.
+- Added `app/config.py` to centralise paths, upload limits and the demo credentials.
+- Rewrote `app/routes.py`: safe uploads, clear errors, fixed the admin login route, added the missing patient report route, and replaced the broken MRI route with a clear "not implemented" message.
+- Made model and output paths independent of the working directory; models load on first use.
+- `app/utils.py`: relabelled the PDF, corrected the heatmap caption, added a disclaimer.
+- Removed duplicate copies of the code, templates, static files and model that existed at the repository root, and two unused templates.
+- Fixed page titles, broken form actions and dead buttons; removed the institutional logos of the original authors from the page headers.
+- Removed `tensorflow-io-gcs-filesystem==0.37.1` from `requirements.txt` (TensorFlow declares it itself where it is needed) and the unused `openai` package.
+- Server now listens on localhost only and debug mode is off unless `FLASK_DEBUG=1`.
+- Added automated tests and this README.

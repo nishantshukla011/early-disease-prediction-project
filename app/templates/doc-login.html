@@ -4,15 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Doctor Login | Early Disease Prediction System</title>
     <link rel="stylesheet" href="/static/css/doc-login.css">
 </head>
 
 <body>
     <div class="logo-section">
-        <img src="/static/images/au png.jpg" class="card-img1" alt="...">
-        <h1 class="top-head">AI Powered Early Disease Prediction</h1>
-        <img src="/static/images/3.O logo.png" class="card-img2" alt="...">
+        <h1 class="top-head">AI-Powered Early Disease Prediction System</h1>
     </div>
     <!-- <h1>Admins Login Form</h1> -->
 
@@ -33,8 +31,9 @@
                             <input type="password" required name="doctorPass"/>
                             <label>Password</label>
                         </div>
-                        <button type="submit" id="loginForm" class="btn" onclick="goToDashBoard()">Login</button>
+                        <button type="submit" id="loginForm" class="btn">Login</button>
                     </form>
+        <p style="margin-top:14px;font-size:0.8em;text-align:center;color:#555;">Demo login only: {{ demo_credentials['doctor'][0] }} / {{ demo_credentials['doctor'][1] }} (demo credentials, not real authentication)</p>
                 </div>
             </div>
         </div>

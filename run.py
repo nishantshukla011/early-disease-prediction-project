@@ -1,13 +1,19 @@
 """
-Author: Patan Musthakheem
-Date & Time: 20-03-2025 03:14 Am
-"""
+Original author: Patan Musthakheem
+Original date & time: 20-03-2025 03:14 AM
+Original project: https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System (GPL-3.0)
 
-from app import create_app
+Modified for academic submission by nishantshukla011 on 17 October 2026:
+the secret key now lives in create_app(), and the server listens on
+localhost only with debug mode off unless FLASK_DEBUG=1 is set.
+"""
 
 import os
 
+from app import create_app
+
 app = create_app()
-app.config['SECRET_KEY'] =  os.urandom(32)
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=3000, debug=True)
+    debug = os.environ.get("FLASK_DEBUG") == "1"
+    app.run(host="127.0.0.1", port=3000, debug=debug)
