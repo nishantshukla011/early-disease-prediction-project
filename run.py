@@ -1,9 +1,8 @@
 """
-Original author: Nishant Shukla
-Original date & time: 17-10-2026 01:14 AM
-
-
-
+Modified by Nishant Shukla, based on pmk456's project.
+Upstream repository: https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System (GPL-3.0)
+Modification date: 17-10-2026
+"""
 
 import os
 
