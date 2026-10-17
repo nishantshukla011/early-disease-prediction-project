@@ -1,65 +1,55 @@
-# AI-Powered Early Disease Prediction System  
+# AI-Powered Early Disease Prediction System
 
-## Overview  
-Designed specifically for healthcare professionals and researchers, our AI-Powered Early Disease Prediction System leverages state-of-the-art deep learning techniques—featuring the EfficientNetB0 architecture—to analyze patient symptoms and predict potential diseases at an early stage. This decision-support tool is intended to complement clinical judgment by providing timely, data-driven insights that can assist in early intervention and improve patient outcomes.
+## Overview
+The AI-Powered Early Disease Prediction System is a Python Flask web application designed to demonstrate how machine learning can assist with medical image analysis. It includes an X-ray analysis workflow, heatmap visualization, and a web interface with separate login areas for patients, doctors, and administrators.
 
+## Features
+- Chest X-ray image upload and model-based prediction.
+- Heatmap generation to visualize image regions associated with the model's output.
+- Doctor dashboard with patient data and emergency-related sections.
+- Flask-based web interface with HTML templates and static assets.
+- Automated report generation, subject to API configuration and availability.
 
-## Features  
-- **AI-Powered Predictions** – Uses a deep learning model for accurate disease detection.  
-- **Easy-to-Use Interface** – A simple web UI for entering symptoms.  
-- **Multi-Disease Support** – Covers a variety of illnesses for early alerts.  
-- **Fast & Efficient** – Quick results based on pre-trained models.  
-- **Privacy-Focused** – No sensitive data storage or tracking.  
+## Technology Stack
+- Python and Flask
+- TensorFlow/Keras
+- OpenAI API for the original report-generation implementation
+- HTML, CSS, and JavaScript
 
-## Tech Stack  
-- **Backend:** Python, Flask  
-- **Frontend:** HTML, CSS, JavaScript  
-- **Machine Learning:** TensorFlow, Scikit-learn, **EfficientNetB0**  
-- **APIs:** Custom API for disease prediction  
+## Project Structure
+- `run.py` — application entry point
+- `app/routes.py` — web routes and application workflows
+- `app/api.py` — X-ray prediction logic
+- `app/chat.py` — report text generation
+- `app/generate_heatmap.py` — heatmap generation
+- `app/models/` — trained model file
+- `app/templates/` — HTML pages
+- `app/static/` — static assets
+- `requirements.txt` — Python dependencies
 
-## How the AI Works  
-We use **EfficientNetB0**, a lightweight yet powerful deep learning model, trained on medical datasets to predict diseases based on symptoms.  
-**Key Training Details:**  
--  **Dataset:** NIH Chest X-Ray
--  **Preprocessing:** Normalization, augmentation  
--  **Evaluation Metrics:** Accuracy, Precision, Recall, F1-score  
+## Setup
+1. Install Python compatible with the dependencies in `requirements.txt`.
+2. Clone this repository:
+   ```bash
+   git clone https://github.com/nishantshukla011/early-disease-prediction-project.git
+   cd early-disease-prediction-project
+   ```
+3. Create and activate a virtual environment.
+4. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+5. Configure any required API credentials using environment variables. Never commit API keys or passwords.
+6. Start the application:
+   ```bash
+   python run.py
+   ```
 
-## 📂 Project Structure  
-### 🛠 Explanation:  
-- **`app/`
-  - **`model_train/`** → Training Files
-  - **`models/`** → Stores trained ML models.   
-  - **`static/`** → Contains CSS, JavaScript, and images for the frontend.  
-  - **`templates/`** → Holds HTML files for the user interface.  
-  - **`api.py`** → API for predicting disease from given X-Ray
-  - **`chat.py`** → LLM API
-  - **`generate_heatmap.py`** → Heatmap generator for explainability of AI Model
-  - **`routes.py`** → Routes for Backend
-  - **`utils.py`** → Basic utility functions
-- **`requirements.txt`** → Lists dependencies.  
-- **`.gitignore`** → Prevents unnecessary files from being committed.
-- **run** → Starting Point
+## Limitations
+This project is an educational demonstration, not a medical diagnostic device. Predictions can be inaccurate and must not be used to make clinical decisions. Model performance depends on its training data and implementation. Some report-generation features may require external API access.
 
-## Installation & Setup  
-### 1️⃣ Clone the Repository  
-```bash
-git clone https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System.git
-cd AI-Powered-Early-Disease-Prediction-System
-```
-## Create a Virtual Environment (Optional, But Recommended)
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-## Install all Required Dependencies
-```bash
-pip install -r requirements.txt
-```
-## Run the Application
-```bash
-export API_TOKEN=openai-token
-python run.py
-```
-## Open in Browser
- **http://localhost:5000
- 
+## Attribution and License
+This repository is based on the original project by [pmk456](https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System). The original project includes a GPL-3.0 license; retain the license and comply with its terms when redistributing or modifying the code.
+
+## Disclaimer
+This application is intended for educational and demonstration purposes only. It is not a substitute for professional medical evaluation.
