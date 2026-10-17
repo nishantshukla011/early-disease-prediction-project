@@ -1,12 +1,9 @@
 """
-Original author: Patan Musthakheem
-Original date & time: 20-03-2025 03:14 AM
-Original project: https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System (GPL-3.0)
+Original author: Nishant Shukla
+Original date & time: 17-10-2026 01:14 AM
 
-Modified for academic submission by nishantshukla011 on 17 October 2026:
-the secret key now lives in create_app(), and the server listens on
-localhost only with debug mode off unless FLASK_DEBUG=1 is set.
-"""
+
+
 
 import os
 
