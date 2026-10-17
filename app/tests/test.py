@@ -96,6 +96,25 @@ class ReportTextTests(unittest.TestCase):
         text = report.build_report_text(["Pneumonia"], {"Pneumonia": 0.99}).lower()
         self.assertNotIn("confirmed", text.replace("not a confirmed", ""))
 
+    def test_confidence_tier_categorization(self):
+        self.assertIn("High", report.get_confidence_tier(0.85))
+        self.assertIn("Moderate", report.get_confidence_tier(0.60))
+        self.assertIn("Borderline", report.get_confidence_tier(0.40))
+        self.assertIn("Below", report.get_confidence_tier(0.20))
+
+    def test_cooccurrence_patterns_detection(self):
+        patterns = report.find_cooccurrence_patterns(["Cardiomegaly", "Edema"])
+        self.assertTrue(len(patterns) >= 1)
+        self.assertIn("Cardiomegaly and Edema", patterns[0])
+
+    def test_report_includes_cooccurrence(self):
+        text = report.build_report_text(
+            ["Cardiomegaly", "Edema"],
+            {"Cardiomegaly": 0.8, "Edema": 0.75}
+        )
+        self.assertIn("Clinical Co-occurrence Analysis", text)
+        self.assertIn("Cardiomegaly and Edema", text)
+
 
 class AppTests(unittest.TestCase):
     def setUp(self):
@@ -234,5 +253,123 @@ class RealPdfTests(unittest.TestCase):
         self.assertTrue(pdf.startswith(b"%PDF"))
 
 
+class AttributionAndIntegrityTests(unittest.TestCase):
+    def test_license_restored(self):
+        from app.config import PROJECT_DIR
+        license_path = os.path.join(PROJECT_DIR, "LICENSE")
+        self.assertTrue(os.path.isfile(license_path))
+        with open(license_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        self.assertIn("GNU GENERAL PUBLIC LICENSE", content)
+        self.assertIn("Version 3", content)
+
+    def test_academic_disclosure_file(self):
+        from app.config import PROJECT_DIR
+        disclosure_path = os.path.join(PROJECT_DIR, "ACADEMIC_DISCLOSURE.md")
+        self.assertTrue(os.path.isfile(disclosure_path))
+        with open(disclosure_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        self.assertIn("pmk456", content)
+        self.assertIn("GPL-3.0", content)
+        self.assertIn("Nishant Shukla", content)
+
+    def test_readme_credits_attribution(self):
+        from app.config import PROJECT_DIR
+        readme_path = os.path.join(PROJECT_DIR, "README.md")
+        self.assertTrue(os.path.isfile(readme_path))
+        with open(readme_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        self.assertIn("Credits and Attribution", content)
+        self.assertIn("pmk456", content)
+        self.assertIn("ACADEMIC_DISCLOSURE.md", content)
+
+    def test_run_authorship(self):
+        from app.config import PROJECT_DIR
+        run_path = os.path.join(PROJECT_DIR, "run.py")
+        with open(run_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        self.assertNotIn("Original author: Nishant Shukla", content)
+        self.assertIn("pmk456", content)
+
+
+class MedicalImagingTests(unittest.TestCase):
+    def test_load_standard_png(self):
+        from app.medical_imaging import load_medical_image
+        buf = make_png(mode="RGB", size=(100, 100))
+        img, meta = load_medical_image(buf)
+        self.assertEqual(img.size, (100, 100))
+        self.assertEqual(img.mode, "RGB")
+        self.assertEqual(meta["format"], "STANDARD")
+
+    def test_load_16bit_image(self):
+        import numpy as np
+        from app.medical_imaging import load_medical_image
+        arr = np.linspace(0, 65535, 10000, dtype=np.uint16).reshape((100, 100))
+        pil16 = Image.fromarray(arr)
+        buf = BytesIO()
+        pil16.save(buf, format="PNG")
+        buf.seek(0)
+        img, meta = load_medical_image(buf)
+        self.assertEqual(img.mode, "RGB")
+        self.assertEqual(img.size, (100, 100))
+
+    def test_window_level_transformation(self):
+        import numpy as np
+        from app.medical_imaging import apply_window_level
+        arr = np.array([0, 50, 100, 200], dtype=np.float32)
+        norm = apply_window_level(arr, center=100, width=100)
+        self.assertEqual(norm.dtype, np.uint8)
+        self.assertEqual(norm[0], 0)
+        self.assertEqual(norm[-1], 255)
+
+    def test_dicom_bytes_detector(self):
+        from app.medical_imaging import is_dicom_bytes
+        self.assertFalse(is_dicom_bytes(b"not dicom"))
+        fake_dcm = b"\x00" * 128 + b"DICM" + b"\x00" * 100
+        self.assertTrue(is_dicom_bytes(fake_dcm))
+
+    def test_invalid_image_raises_value_error(self):
+        from app.medical_imaging import load_medical_image
+        with self.assertRaises(ValueError):
+            load_medical_image(b"")
+        with self.assertRaises(ValueError):
+            load_medical_image(b"corrupted binary data")
+
+
+class ModelAnalysisTests(unittest.TestCase):
+    def test_label_prevalence(self):
+        import pandas as pd
+        from app.model_analysis import calculate_label_prevalence
+        df = pd.DataFrame({
+            "Finding Labels": ["Cardiomegaly|Edema", "Cardiomegaly", "No Finding"]
+        })
+        prev = calculate_label_prevalence(df)
+        labels = prev["Label"].tolist()
+        self.assertIn("Cardiomegaly", labels)
+        self.assertIn("Edema", labels)
+        self.assertIn("No Finding", labels)
+
+    def test_cooccurrence_matrix(self):
+        import pandas as pd
+        from app.model_analysis import calculate_cooccurrence_matrix
+        df = pd.DataFrame({
+            "Finding Labels": ["Cardiomegaly|Edema", "Cardiomegaly"]
+        })
+        matrix = calculate_cooccurrence_matrix(df, labels=["Cardiomegaly", "Edema"])
+        self.assertEqual(matrix.loc["Cardiomegaly", "Edema"], 1)
+        self.assertEqual(matrix.loc["Cardiomegaly", "Cardiomegaly"], 2)
+
+    def test_multilabel_metrics(self):
+        import numpy as np
+        from app.model_analysis import compute_multilabel_metrics
+        y_true = np.array([[1, 0], [0, 1], [1, 1]])
+        y_pred = np.array([[1, 0], [1, 1], [1, 1]])
+        metrics = compute_multilabel_metrics(y_true, y_pred, labels=["A", "B"])
+        self.assertIn("macro_f1", metrics)
+        self.assertIn("hamming_loss", metrics)
+        self.assertGreaterEqual(metrics["macro_f1"], 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
+
