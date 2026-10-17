@@ -1,27 +1,23 @@
-import openai, os
-import base64
-API_TOKEN = os.getenv('API_TOKEN')
-openai.api_token = API_TOKEN
+
 class GPT:
-    
-    def __init__(self):    
-        pass  
-        
+    def __init__(self):
+        pass
+
     def create_prompt(self, label):
-        response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
-            messages=[
-            {"role": "system", "content": "You are a medical AI Diagnostic expert and a radiologist."},
-            {"role": "user", "content": f"""
-            My X-ray model predicted: {label}.
-            Can you explain what this means in a single para! if it predicted
-            nothing then it means no disease detected then just tell that there is no disease detected.   
-            """}
-            ]   
+        label = str(label).strip() if label is not None else ""
+
+        if not label or label.lower() in {
+            "none", "nothing", "normal", "no disease detected"
+        }:
+            return (
+                "The model did not return a positive disease label. "
+                "This does not rule out disease. Please consult a qualified "
+                "radiologist or medical professional for interpretation."
+            )
+
+        return (
+            f"The X-ray model returned the label: {label}. "
+            "This is an automated model output, not a medical diagnosis. "
+            "The result must be reviewed by a qualified radiologist or "
+            "medical professional before any clinical decision is made."
         )
-        return response['choices'][0]['message']['content']
-    
-    
-    def _encode_image(self, image):
-        with open(image, "rb") as img_file:
-            return base64.b64encode(img_file.read()).decode("utf-8")
