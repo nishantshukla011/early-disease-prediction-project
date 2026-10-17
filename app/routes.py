@@ -126,13 +126,13 @@ def doctor_upload_xray():
     if upload is None or upload.filename == "":
         return _error("Please choose an X-ray image to upload.")
     if not _allowed_file(upload.filename):
-        return _error("Only PNG or JPG images are accepted.")
+        return _error("Only PNG, JPG or DICOM images are accepted.")
 
     raw = upload.read()
     try:
-        image = Image.open(BytesIO(raw))
-        image.load()
-        image = image.convert("RGB")
+        from app.medical_imaging import convert_image_to_jpeg_bytes, load_medical_image
+        image, _meta = load_medical_image(raw)
+        raw_jpeg = convert_image_to_jpeg_bytes(image)
     except Exception:
         return _error("The uploaded file is not a valid image.")
 
@@ -152,14 +152,14 @@ def doctor_upload_xray():
             return _error("The prediction model could not be loaded. Check the server console for details.",
                           500, "Model unavailable")
 
-        result = predictor.predict(raw)
+        result = predictor.predict(raw_jpeg)
         if "error" in result:
             return _error(result["error"])
 
-        heatmap = heatmap_generator.generate_heatmap(raw)
+        heatmap = heatmap_generator.generate_heatmap(raw_jpeg)
         if heatmap is None:
             return _error("The heatmap could not be generated for this image.", 500)
-        heatmap_generator.overlay_heatmap(heatmap, raw, output_filename=overlay_name)
+        heatmap_generator.overlay_heatmap(heatmap, raw_jpeg, output_filename=overlay_name)
 
         report_text = report.build_report_text(result["prediction"], result.get("scores"))
         pdf_bytes = utils.generate_pdf(xray_path, overlay_path, report_text)

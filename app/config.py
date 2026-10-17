@@ -28,7 +28,7 @@ DEMO_CREDENTIALS = {
 }
 
 # --- Upload limits ----------------------------------------------------------
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "dcm"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
 APP_TITLE = "AI-Powered Early Disease Prediction System"
