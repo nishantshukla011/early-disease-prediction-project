@@ -1,21 +1,22 @@
 """
-Local, deterministic report text for the Early Disease Prediction System.
+Local, deterministic report text and clinical risk stratification.
 
-Modified for academic submission by nishantshukla011 on 17 October 2026:
-this module replaces the original app/chat.py, which called the paid OpenAI
-API. It makes no network calls. The text is produced from a fixed template and
-only uses the labels (and raw scores) that the trained model actually returned.
-Nothing here is a diagnosis.
-
-All text is plain ASCII so that it can be written into the PDF with the
-built-in Latin-1 fonts of the fpdf library.
+Modified and extended by Nishant Shukla for academic submission in October 2026:
+- Replaces original app/chat.py (which called the paid external OpenAI API) with
+  a deterministic offline report engine.
+- Added multi-tier clinical risk stratification (High, Moderate, Borderline).
+- Added multi-label syndrome co-occurrence correlation analysis based on known
+  NIH ChestX-ray14 pathology associations.
+- Strictly deterministic, offline, and safe for Latin-1/ASCII PDF generation.
+- Never outputs a clinical diagnosis or claims healthiness.
 """
 
 NO_FINDING = "No Disease Detected"
 THRESHOLD = 0.5
+HIGH_THRESHOLD = 0.70
+BORDERLINE_THRESHOLD = 0.35
 
 # Generic, textbook-style background for each label the model can output.
-# This is NOT a finding about the patient.
 LABEL_BACKGROUND = {
     "Atelectasis": "partial or complete collapse of lung tissue.",
     "Cardiomegaly": "an enlarged heart.",
@@ -33,6 +34,30 @@ LABEL_BACKGROUND = {
     "Pneumothorax": "air in the space around the lung, which can cause the lung to collapse.",
 }
 
+# Established multi-label co-occurrence patterns in chest radiography
+COOCCURRENCE_PATTERNS = [
+    (
+        {"Cardiomegaly", "Edema"},
+        "Cardiomegaly and Edema: Frequent dual-presentation commonly associated with congestive cardiac insufficiency or fluid overload.",
+    ),
+    (
+        {"Consolidation", "Effusion"},
+        "Consolidation and Effusion: Co-presentation frequently observed in acute pneumonia and parapneumonic effusions.",
+    ),
+    (
+        {"Atelectasis", "Effusion"},
+        "Atelectasis and Effusion: Pleural fluid accumulation may cause secondary compressive loss of adjacent lung volume.",
+    ),
+    (
+        {"Infiltration", "Consolidation"},
+        "Infiltration and Consolidation: Overlapping radiographic density patterns characteristic of acute inflammatory or infectious processes.",
+    ),
+    (
+        {"Emphysema", "Pneumothorax"},
+        "Emphysema and Pneumothorax: Chronic alveolar hyperinflation and bullous changes may heighten susceptibility to spontaneous pleural air entry.",
+    ),
+]
+
 DISCLAIMER = (
     "This report was produced automatically by an educational demonstration "
     "model. It is not a medical diagnosis and must not be used for clinical "
@@ -44,6 +69,28 @@ DISCLAIMER = (
 def _ascii(text):
     """Return text that is safe for the Latin-1 PDF fonts."""
     return str(text).encode("ascii", errors="replace").decode("ascii")
+
+
+def get_confidence_tier(score: float) -> str:
+    """Categorizes model confidence score into qualitative clinical tiers."""
+    if score >= HIGH_THRESHOLD:
+        return "High Suspicion (score >= 0.70)"
+    elif score >= THRESHOLD:
+        return "Moderate Suspicion (0.50 <= score < 0.70)"
+    elif score >= BORDERLINE_THRESHOLD:
+        return "Borderline / Low Suspicion (0.35 <= score < 0.50)"
+    else:
+        return "Below Threshold"
+
+
+def find_cooccurrence_patterns(flagged_labels: list[str]) -> list[str]:
+    """Identifies known pathology co-occurrence patterns among flagged labels."""
+    label_set = set(flagged_labels)
+    identified = []
+    for pair_set, note in COOCCURRENCE_PATTERNS:
+        if pair_set.issubset(label_set):
+            identified.append(note)
+    return identified
 
 
 def build_report_text(labels, scores=None):
@@ -74,15 +121,29 @@ def build_report_text(labels, scores=None):
     for label in flagged:
         pretty = label.replace("_", " ")
         if label in scores:
-            lines.append("- %s (raw model output: %.2f)" % (pretty, float(scores[label])))
+            score_val = float(scores[label])
+            tier = get_confidence_tier(score_val)
+            lines.append("- %s (raw model output: %.2f - %s)" % (pretty, score_val, tier))
         else:
             lines.append("- %s" % pretty)
+
     lines += [
         "",
         "Raw model outputs are not calibrated probabilities and should not be "
         "read as the chance that a condition is present.",
     ]
 
+    # Clinical Co-occurrence Insights
+    cooccurrences = find_cooccurrence_patterns(flagged)
+    if cooccurrences:
+        lines += [
+            "",
+            "Clinical Co-occurrence Analysis (NIH ChestX-ray14 correlation):",
+        ]
+        for note in cooccurrences:
+            lines.append("- %s" % note)
+
+    # General condition background
     known = [label for label in flagged if label in LABEL_BACKGROUND]
     if known:
         lines += ["", "General background (not specific to this patient):"]
