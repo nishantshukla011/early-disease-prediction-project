@@ -20,11 +20,11 @@ HEATMAP_DIR = os.path.join(BASE_DIR, "static", "heatmaps")
 UPLOAD_DIR = os.path.join(PROJECT_DIR, "uploads")
 
 # --- DEMO CREDENTIALS (not production authentication) -----------------------
-# Same demo account for all three roles, taken from the original project.
+# One demo account is used for all three roles.
 DEMO_CREDENTIALS = {
-    "admin": ("mahima", "mahima"),
-    "doctor": ("mahima", "mahima"),
-    "patient": ("mahima", "mahima"),
+    "admin": ("nishant", "nishant"),
+    "doctor": ("nishant", "nishant"),
+    "patient": ("nishant", "nishant"),
 }
 
 # --- Upload limits ----------------------------------------------------------

@@ -1,4 +1,3 @@
-# filepath: /home/mahima/Desktop/AI-Powered-Early-Disease-Prediction-System/src/train_model_pneumonia.py
 """
 Author: Patan Musthakheem
 Date & Time: 2025-03-18 17:16

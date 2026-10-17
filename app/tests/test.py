@@ -155,7 +155,7 @@ class AppTests(unittest.TestCase):
 
     def test_non_ascii_password_does_not_crash(self):
         response = self.client.post("/doctor-login/doctor-dashboard",
-                                    data={"doctorId": "mahima", "doctorPass": "päss"})
+                                    data={"doctorId": "nishant", "doctorPass": "päss"})
         self.assertEqual(response.status_code, 401)
 
     # --- protected pages

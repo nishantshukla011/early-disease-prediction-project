@@ -79,9 +79,9 @@ The login pages show the demo credentials. They are defined in `app/config.py`:
 
 | Role    | User ID  | Password |
 |---------|----------|----------|
-| Admin   | `mahima` | `mahima` |
-| Doctor  | `mahima` | `mahima` |
-| Patient | `mahima` | `mahima` |
+| Admin   | `nishant` | `nishant` |
+| Doctor  | `nishant` | `nishant` |
+| Patient | `nishant` | `nishant` |
 
 These are **demo credentials, not real authentication**. There is no database, no password hashing and no user management. Never deploy this application publicly with them.
 
@@ -131,5 +131,6 @@ It is distributed under the **GNU General Public License v3.0** (see `LICENSE`),
 - Removed duplicate copies of the code, templates, static files and model that existed at the repository root, and two unused templates.
 - Fixed page titles, broken form actions and dead buttons; removed the institutional logos of the original authors from the page headers.
 - Removed `tensorflow-io-gcs-filesystem==0.37.1` from `requirements.txt` (TensorFlow declares it itself where it is needed) and the unused `openai` package.
+- Changed the demo login to `nishant` / `nishant`, deleted the unused Alliance University logo image files, and removed a stray personal file-path comment from `train_model_pneumonia.py`.
 - Server now listens on localhost only and debug mode is off unless `FLASK_DEBUG=1`.
 - Added automated tests and this README.
