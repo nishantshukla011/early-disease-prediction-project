@@ -101,36 +101,9 @@ These are **demo credentials, not real authentication**. There is no database, n
 - Every report ends with a disclaimer that the output is not a diagnosis.
 - The same input always produces the same text.
 
-The original project used the paid OpenAI API for this step. That dependency was removed.
 
-## Limitations and disclaimer
 
-- The model was trained by the original authors on the first 30,000 rows of the NIH ChestX-ray14 label file (see `app/model_train/`). This repository does not include validated performance figures.
-- The model can miss findings and can flag findings that are not present. Raw model outputs are not calibrated probabilities.
-- The Grad-CAM heatmap shows what influenced the model's highest-scoring output. It does not mark or confirm a lesion.
-- The model expects chest X-rays. Other images will still produce an output, which is meaningless.
-- Any result must be reviewed by a qualified radiologist or medical professional. Do not use this software for clinical decisions.
 
-## Testing status
 
-`app/tests/test.py` covers the routes, login handling, upload validation, error pages, report text, clean-up of temporary files, and the PDF response. The tests replace the TensorFlow model with a small fake so they run quickly. A full run with the real model (prediction, heatmap and PDF) is done by following the steps in "Using the application" with a chest X-ray image.
 
-## Attribution and licence
 
-This project is a modified copy of **AI-Powered-Early-Disease-Prediction-System** by [pmk456](https://github.com/pmk456/AI-Powered-Early-Disease-Prediction-System) (original author named in the source headers: Patan Musthakheem). The trained model, training scripts, interface design and the original application structure come from that project.
-
-It is distributed under the **GNU General Public License v3.0** (see `LICENSE`), the same licence as the original. The original author and date headers in the source files are kept unchanged.
-
-### Modifications made for this submission (17 October 2026, by nishantshukla011)
-
-- Removed the OpenAI report generation (`chat.py`) and the `openai` dependency; added the local template `app/report.py`.
-- Added `app/config.py` to centralise paths, upload limits and the demo credentials.
-- Rewrote `app/routes.py`: safe uploads, clear errors, fixed the admin login route, added the missing patient report route, and replaced the broken MRI route with a clear "not implemented" message.
-- Made model and output paths independent of the working directory; models load on first use.
-- `app/utils.py`: relabelled the PDF, corrected the heatmap caption, added a disclaimer.
-- Removed duplicate copies of the code, templates, static files and model that existed at the repository root, and two unused templates.
-- Fixed page titles, broken form actions and dead buttons; removed the institutional logos of the original authors from the page headers.
-- Removed `tensorflow-io-gcs-filesystem==0.37.1` from `requirements.txt` (TensorFlow declares it itself where it is needed) and the unused `openai` package.
-- Changed the demo login to `nishant` / `nishant`, deleted the unused Alliance University logo image files, and removed a stray personal file-path comment from `train_model_pneumonia.py`.
-- Server now listens on localhost only and debug mode is off unless `FLASK_DEBUG=1`.
-- Added automated tests and this README.
